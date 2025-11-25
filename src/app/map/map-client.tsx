@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, Suspense } from "react";
-import { Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
+import { Map as GoogleMap, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import {
   Sheet,
   SheetContent,
@@ -117,7 +117,7 @@ export default function MapClient({
 
       <div className="flex-1 h-full rounded-lg overflow-hidden">
         <Suspense fallback={<div className="bg-muted h-full w-full flex items-center justify-center">Loading Map...</div>}>
-            <Map
+            <GoogleMap
               defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
               defaultZoom={12}
               mapId="twinview_map"
@@ -137,7 +137,7 @@ export default function MapClient({
                     />
                 </AdvancedMarker>
               ))}
-            </Map>
+            </GoogleMap>
         </Suspense>
       </div>
 
