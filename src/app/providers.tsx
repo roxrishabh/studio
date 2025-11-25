@@ -5,8 +5,9 @@ import { MissingApiKey } from "@/components/MissingApiKey";
 
 export function Providers({ children }: { children: React.ReactNode }) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiEnabled = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_ENABLED === 'true';
 
-    if (!apiKey) {
+    if (!apiKey || !apiEnabled) {
         return <MissingApiKey />;
     }
 
