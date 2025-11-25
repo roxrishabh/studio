@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense, useEffect } from "react";
 import { Map as GoogleMap, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import {
   Sheet,
@@ -37,6 +37,7 @@ export default function MapClient({
 }) {
   const [selectedSensor, setSelectedSensor] = useState<Sensor | undefined>(initialSensor);
   const [sensorReadings, setSensorReadings] = useState<SensorReading[]>(initialReadings);
+  const [mapCenter, setMapCenter] = useState({ lat: 37.7749, lng: -122.4194 });
   const [filter, setFilter] = useState<Record<Sensor["type"], boolean>>({
     "Air Quality": true,
     "Traffic": true,
@@ -46,6 +47,23 @@ export default function MapClient({
   const [isDetecting, setIsDetecting] = useState(false);
   const [anomalyData, setAnomalyData] = useState<AnomalyPoint[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => {
+          // Handle error or permission denial, keep default center
+          console.log("Geolocation permission denied. Using default location.");
+        }
+      );
+    }
+  }, []);
 
   const filteredSensors = useMemo(() => {
     return sensors.filter((sensor) => filter[sensor.type]);
@@ -118,7 +136,7 @@ export default function MapClient({
       <div className="flex-1 h-full rounded-lg overflow-hidden">
         <Suspense fallback={<div className="bg-muted h-full w-full flex items-center justify-center">Loading Map...</div>}>
             <GoogleMap
-              defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
+              center={mapCenter}
               defaultZoom={12}
               mapId="twinview_map"
               gestureHandling={'greedy'}
