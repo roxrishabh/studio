@@ -4,7 +4,7 @@ import './globals.css';
 import AppLayout from '@/components/layout/app-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { Providers } from './providers';
-import { FirebaseClientProvider } from '@/firebase';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 const inter = Inter({
   subsets: ['latin'],

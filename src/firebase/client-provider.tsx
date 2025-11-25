@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
-import { initializeFirebase, FirebaseProvider } from '@/firebase';
+import { initializeFirebase } from '@/firebase/index';
+import { FirebaseProvider } from '@/firebase/provider';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [firebase, setFirebase] = useState<ReturnType<typeof initializeFirebase> | null>(null);
@@ -22,6 +25,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       auth={firebase.auth}
       firestore={firebase.firestore}
     >
+      <FirebaseErrorListener />
       {children}
     </FirebaseProvider>
   );

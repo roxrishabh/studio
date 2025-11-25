@@ -21,8 +21,9 @@ function initializeFirebase() {
 export { initializeFirebase };
 
 // Export Firebase providers and hooks for easy consumption in components.
-export { FirebaseProvider, useFirebase, useFirebaseApp, useAuth, useFirestore, FirebaseClientProvider } from './provider';
+export { FirebaseProvider, useFirebase, useFirebaseApp, useAuth, useFirestore } from './provider';
 export { useUser } from './auth/use-user';
 export { useCollection } from './firestore/use-collection';
 export { useDoc } from './firestore/use-doc';
 export { useMemoFirebase } from './firestore/use-memo-firebase';
+export { FirebaseClientProvider } from './client-provider';
