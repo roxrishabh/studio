@@ -150,40 +150,41 @@ export default function MapClient({
               disableDefaultUI={true}
             >
               {filteredSensors.map((sensor) => (
-                <Popover key={sensor.id} open={hoveredSensorId === sensor.id}>
-                  <PopoverTrigger asChild>
-                    <div
+                <AdvancedMarker
+                  key={sensor.id}
+                  position={sensor.location}
+                  onClick={() => handleMarkerClick(sensor)}
+                >
+                  <Popover open={hoveredSensorId === sensor.id}>
+                    <PopoverTrigger asChild>
+                      <div
+                        onMouseEnter={() => setHoveredSensorId(sensor.id)}
+                        onMouseLeave={() => setHoveredSensorId(null)}
+                      >
+                        <Pin 
+                          background={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
+                          glyphColor={sensor.status === 'alert' ? 'hsl(var(--destructive-foreground))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary-foreground))' : 'hsl(var(--secondary))')}
+                          borderColor={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      side="top"
+                      align="center"
+                      className="w-auto p-2"
                       onMouseEnter={() => setHoveredSensorId(sensor.id)}
                       onMouseLeave={() => setHoveredSensorId(null)}
                     >
-                      <AdvancedMarker
-                        position={sensor.location}
-                        onClick={() => handleMarkerClick(sensor)}
-                      >
-                          <Pin 
-                              background={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
-                              glyphColor={sensor.status === 'alert' ? 'hsl(var(--destructive-foreground))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary-foreground))' : 'hsl(var(--secondary))')}
-                              borderColor={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
-                          />
-                      </AdvancedMarker>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    side="top"
-                    align="center"
-                    className="w-auto p-2"
-                    onMouseEnter={() => setHoveredSensorId(sensor.id)}
-                    onMouseLeave={() => setHoveredSensorId(null)}
-                  >
-                    <div className="p-2">
-                      <h4 className="font-bold">{sensor.name}</h4>
-                      <p className="text-sm text-muted-foreground">{sensor.type}</p>
-                      <Badge variant={sensor.status === 'online' ? 'default' : 'destructive'} className="mt-2">
-                        {sensor.status}
-                      </Badge>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                      <div className="p-2">
+                        <h4 className="font-bold">{sensor.name}</h4>
+                        <p className="text-sm text-muted-foreground">{sensor.type}</p>
+                        <Badge variant={sensor.status === 'online' ? 'default' : 'destructive'} className="mt-2">
+                          {sensor.status}
+                        </Badge>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </AdvancedMarker>
               ))}
             </GoogleMap>
         </Suspense>
