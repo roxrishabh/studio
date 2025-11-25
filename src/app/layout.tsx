@@ -3,7 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import AppLayout from '@/components/layout/app-layout';
 import { Toaster } from '@/components/ui/toaster';
-import { APIProvider } from '@vis.gl/react-google-maps';
+import { Providers } from './providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,11 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
-        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+        <Providers>
           <AppLayout>
             {children}
           </AppLayout>
-        </APIProvider>
+        </Providers>
         <Toaster />
       </body>
     </html>
