@@ -5,7 +5,6 @@ import AppLayout from '@/components/layout/app-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { Providers } from './providers';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { MissingApiKey } from '@/components/MissingApiKey';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,16 +26,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
-    return (
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
-          <MissingApiKey />
-        </body>
-      </html>
-    )
-  }
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
