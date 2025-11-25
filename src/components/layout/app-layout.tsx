@@ -5,10 +5,11 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent } from '../ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const isMobile = useIsMobile();
 
     if (isMobile) {
@@ -17,6 +18,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 <Header onMenuClick={() => setIsSidebarOpen(true)} />
                 <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                     <SheetContent side="left" className="p-0 w-72">
+                        <SheetHeader>
+                          <SheetTitle>
+                            <VisuallyHidden>Navigation Menu</VisuallyHidden>
+                          </SheetTitle>
+                        </SheetHeader>
                         <Sidebar isExpanded={true} setExpanded={setIsSidebarOpen} />
                     </SheetContent>
                 </Sheet>
