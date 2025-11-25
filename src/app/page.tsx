@@ -1,14 +1,28 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getSensors, getAlerts } from "@/lib/data";
-import { Cpu, Bell, ShieldCheck, MapPin } from "lucide-react";
+import { getSensors } from "@/lib/data";
+import { Cpu, Bell, ShieldCheck } from "lucide-react";
 import DashboardClient from "./dashboard-client";
+import { useCollection } from "@/firebase";
+import { collection, query, orderBy, limit } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
+import type { Alert } from "@/lib/types";
+import { SeedDataButton } from "@/components/seed-data-button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const sensors = getSensors();
-  const alerts = getAlerts();
-  const activeAlerts = alerts.filter(a => a.status === 'new').length;
+  const firestore = useFirestore();
+
+  const alertsCollection = firestore ? collection(firestore, 'alerts') : null;
+  const alertsQuery = alertsCollection ? query(alertsCollection, orderBy('timestamp', 'desc'), limit(5)) : null;
+
+  const { data: alerts, loading } = useCollection<Alert>(alertsQuery);
+
+  const activeAlerts = alerts ? alerts.filter(a => a.status === 'new').length : 0;
 
   const kpiData = [
     { title: "Total Sensors", value: sensors.length, icon: Cpu, color: "text-primary" },
@@ -35,8 +49,9 @@ export default function DashboardPage() {
       <DashboardClient sensors={sensors} />
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Alerts</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Alerts</CardTitle>
+            <SeedDataButton />
         </CardHeader>
         <CardContent>
           <Table>
@@ -49,7 +64,15 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {alerts.slice(0, 5).map((alert) => (
+              {loading && Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-36" /></TableCell>
+                </TableRow>
+              ))}
+              {!loading && alerts?.map((alert) => (
                 <TableRow key={alert.id}>
                   <TableCell className="font-medium">{alert.sensorId}</TableCell>
                   <TableCell>{alert.sensorType}</TableCell>
@@ -61,6 +84,13 @@ export default function DashboardPage() {
                   <TableCell>{new Date(alert.timestamp).toLocaleString()}</TableCell>
                 </TableRow>
               ))}
+               {!loading && (!alerts || alerts.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center h-24">
+                    No recent alerts. Click "Seed Data" to add some to Firestore.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

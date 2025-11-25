@@ -4,6 +4,7 @@ import './globals.css';
 import AppLayout from '@/components/layout/app-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { Providers } from './providers';
+import { FirebaseClientProvider } from '@/firebase';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,9 +30,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <Providers>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <FirebaseClientProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </FirebaseClientProvider>
         </Providers>
         <Toaster />
       </body>

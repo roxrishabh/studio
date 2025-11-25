@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile in the system.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        }
+      },
+      "required": [
+        "displayName",
+        "email"
+      ]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "Represents an alert triggered by a sensor.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "sensorId": {
+          "type": "string"
+        },
+        "sensorType": {
+          "type": "string",
+          "enum": [
+            "Air Quality",
+            "Traffic",
+            "Noise Level",
+            "Public Transport"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "new",
+            "acknowledged",
+            "resolved"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "sensorId",
+        "sensorType",
+        "severity",
+        "timestamp",
+        "description",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/alerts/{alertId}": {
+      "schema": {
+        "$ref": "#/entities/Alert"
+      },
+      "description": "Stores individual alert records."
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores user profile information."
+    }
+  }
+}
