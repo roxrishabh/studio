@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -31,10 +30,17 @@ import {
 } from "@/components/ui/select";
 import type { Alert, Sensor } from "@/lib/types";
 import { PlusCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function AlertsClient({ alerts, sensors }: { alerts: Alert[], sensors: Sensor[] }) {
-  const [filteredAlerts, setFilteredAlerts] = useState(alerts);
-
+export default function AlertsClient({
+  alerts,
+  sensors,
+  loading,
+}: {
+  alerts: Alert[] | null;
+  sensors: Sensor[];
+  loading: boolean;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -75,7 +81,12 @@ export default function AlertsClient({ alerts, sensors }: { alerts: Alert[], sen
                 <Label htmlFor="threshold" className="text-right">
                   Threshold
                 </Label>
-                <Input id="threshold" type="number" placeholder="e.g., 100" className="col-span-3" />
+                <Input
+                  id="threshold"
+                  type="number"
+                  placeholder="e.g., 100"
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="severity" className="text-right">
@@ -113,22 +124,64 @@ export default function AlertsClient({ alerts, sensors }: { alerts: Alert[], sen
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAlerts.map((alert) => (
+            {loading &&
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-36" />
+                  </TableCell>
+                   <TableCell>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-48" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            {!loading && alerts?.map((alert) => (
               <TableRow key={alert.id}>
                 <TableCell className="font-medium">{alert.sensorId}</TableCell>
                 <TableCell>{alert.sensorType}</TableCell>
                 <TableCell>
-                  <Badge variant={alert.severity === 'critical' || alert.severity === 'high' ? "destructive" : "default"}>
+                  <Badge
+                    variant={
+                      alert.severity === "critical" || alert.severity === "high"
+                        ? "destructive"
+                        : "default"
+                    }
+                  >
                     {alert.severity}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(alert.timestamp).toLocaleString()}</TableCell>
                 <TableCell>
-                  <Badge variant={alert.status === 'new' ? "outline" : "secondary"}>{alert.status}</Badge>
+                  {new Date(alert.timestamp).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={alert.status === "new" ? "outline" : "secondary"}
+                  >
+                    {alert.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>{alert.description}</TableCell>
               </TableRow>
             ))}
+             {!loading && (!alerts || alerts.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center h-24">
+                    No alerts found in Firestore. You can add some from the Dashboard page.
+                  </TableCell>
+                </TableRow>
+              )}
           </TableBody>
         </Table>
       </div>
