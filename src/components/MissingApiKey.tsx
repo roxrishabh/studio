@@ -1,3 +1,4 @@
+
 import { AlertTriangle } from 'lucide-react';
 
 export function MissingApiKey() {
