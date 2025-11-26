@@ -50,7 +50,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <DashboardClient sensors={sensors} />
+      <DashboardClient sensors={sensors} alerts={alerts} loadingAlerts={loading} />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

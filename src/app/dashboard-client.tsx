@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
-import type { Sensor } from "@/lib/types";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import type { Sensor, Alert } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const COLORS = {
   online: 'hsl(var(--chart-2))',
@@ -11,19 +12,7 @@ const COLORS = {
   alert: 'hsl(var(--chart-5))',
 };
 
-const getSensorDataForChart = (sensors: Sensor[]) => {
-  const now = new Date();
-  return Array.from({ length: 30 }, (_, i) => {
-    const time = new Date(now.getTime() - (29 - i) * 60000); // last 30 minutes
-    const activeSensors = sensors.filter(s => s.status === 'online').length;
-    return {
-      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }),
-      value: Math.floor(activeSensors * (0.9 + Math.random() * 0.15)), // simulate fluctuations
-    };
-  });
-};
-
-export default function DashboardClient({ sensors }: { sensors: Sensor[] }) {
+export default function DashboardClient({ sensors, alerts, loadingAlerts }: { sensors: Sensor[], alerts: Alert[] | null, loadingAlerts: boolean }) {
   const statusData = useMemo(() => {
     const counts = sensors.reduce((acc, sensor) => {
       acc[sensor.status] = (acc[sensor.status] || 0) + 1;
@@ -32,7 +21,20 @@ export default function DashboardClient({ sensors }: { sensors: Sensor[] }) {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [sensors]);
 
-  const realTimeData = useMemo(() => getSensorDataForChart(sensors), [sensors]);
+  const alertHistogramData = useMemo(() => {
+    if (!alerts) return [];
+    
+    const alertCounts = alerts.reduce((acc, alert) => {
+      const sensorName = sensors.find(s => s.id === alert.sensorId)?.name || alert.sensorId;
+      acc[sensorName] = (acc[sensorName] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(alertCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count); // Sort descending
+
+  }, [alerts, sensors]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -67,23 +69,32 @@ export default function DashboardClient({ sensors }: { sensors: Sensor[] }) {
 
       <Card className="lg:col-span-5">
         <CardHeader>
-          <CardTitle>Real-time Active Sensors</CardTitle>
+          <CardTitle>Alerts per Sensor</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={realTimeData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  borderColor: 'hsl(var(--border))',
-                }}
-              />
-              <Line type="monotone" dataKey="value" name="Active Sensors" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          {loadingAlerts && <Skeleton className="w-full h-[250px]" />}
+          {!loadingAlerts && (
+            <ResponsiveContainer width="100%" height={250}>
+              {alertHistogramData.length > 0 ? (
+                <BarChart data={alertHistogramData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={60} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      borderColor: 'hsl(var(--border))',
+                    }}
+                  />
+                  <Bar dataKey="count" name="Alerts" fill="hsl(var(--primary))" />
+                </BarChart>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No alert data to display.
+                </div>
+              )}
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>
