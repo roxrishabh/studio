@@ -29,14 +29,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
-import { getSensorById } from '@/lib/data'; // We'll still use this to get sensor names
+import { getSensorById } from '@/lib/data'; 
+import { useMemoFirebase } from '@/firebase';
 
 export default function ReportsClient() {
   const firestore = useFirestore();
-  const alertsCollection = firestore ? collection(firestore, 'alerts') : null;
-  const alertsQuery = alertsCollection
-    ? query(alertsCollection, orderBy('timestamp', 'desc'))
-    : null;
+
+  const alertsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    const alertsCollection = collection(firestore, 'alerts');
+    return query(alertsCollection, orderBy('timestamp', 'desc'));
+  }, [firestore]);
 
   const { data: alerts, loading } = useCollection<Alert>(alertsQuery);
 

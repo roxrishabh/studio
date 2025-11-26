@@ -12,13 +12,17 @@ import { useFirestore } from "@/firebase/provider";
 import type { Alert } from "@/lib/types";
 import { SeedDataButton } from "@/components/seed-data-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemoFirebase } from "@/firebase";
 
 export default function DashboardPage() {
   const sensors = getSensors();
   const firestore = useFirestore();
 
-  const alertsCollection = firestore ? collection(firestore, 'alerts') : null;
-  const alertsQuery = alertsCollection ? query(alertsCollection, orderBy('timestamp', 'desc'), limit(5)) : null;
+  const alertsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    const alertsCollection = collection(firestore, 'alerts');
+    return query(alertsCollection, orderBy('timestamp', 'desc'), limit(5));
+  }, [firestore]);
 
   const { data: alerts, loading } = useCollection<Alert>(alertsQuery);
 
