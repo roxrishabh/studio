@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useFirestore } from '@/firebase';
 import { getAlerts } from '@/lib/data';
-import { collection, writeBatch } from 'firebase/firestore';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
@@ -14,14 +14,22 @@ export function SeedDataButton() {
   const { toast } = useToast();
 
   const handleSeedData = async () => {
+    if (!firestore) {
+        toast({
+            variant: 'destructive',
+            title: 'Oh no!',
+            description: 'Firestore is not available.',
+        });
+        return;
+    }
     setIsLoading(true);
     try {
       const batch = writeBatch(firestore);
       const alerts = getAlerts();
-      const alertsCollection = collection(firestore, 'alerts');
+      const alertsCollectionRef = collection(firestore, 'alerts');
 
       alerts.forEach((alert) => {
-        const docRef = collection(firestore, 'alerts').doc(alert.id);
+        const docRef = doc(alertsCollectionRef, alert.id);
         batch.set(docRef, alert);
       });
 
