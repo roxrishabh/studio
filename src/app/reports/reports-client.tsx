@@ -31,6 +31,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
 import { getSensorById } from '@/lib/data'; 
 import { useMemoFirebase } from '@/firebase';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { format } from 'date-fns';
 
 export default function ReportsClient() {
   const firestore = useFirestore();
@@ -61,6 +63,24 @@ export default function ReportsClient() {
     const sensor = getSensorById(sensorId);
     return sensor ? sensor.name : sensorId;
   }
+  
+  const getChartDataForSensor = (sensorAlerts: Alert[]) => {
+    const alertsByDate = sensorAlerts.reduce((acc, alert) => {
+      const date = format(new Date(alert.timestamp), 'yyyy-MM-dd');
+      if (!acc[date]) {
+        acc[date] = 0;
+      }
+      acc[date]++;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(alertsByDate)
+      .map(([date, count]) => ({
+        date,
+        count,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
 
   return (
     <Card>
@@ -92,49 +112,74 @@ export default function ReportsClient() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Severity</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Timestamp</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {alertsBySensor[sensorId].map((alert) => (
-                        <TableRow key={alert.id}>
-                          <TableCell>{alert.description}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                alert.severity === 'critical' ||
-                                alert.severity === 'high'
-                                  ? 'destructive'
-                                  : 'default'
-                              }
-                            >
-                              {alert.severity}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                alert.status === 'new'
-                                  ? 'outline'
-                                  : 'secondary'
-                              }
-                            >
-                              {alert.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(alert.timestamp).toLocaleString()}
-                          </TableCell>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold mb-4 text-center">Alerts per Day</h4>
+                      <div className="h-64 w-full">
+                          <ResponsiveContainer>
+                              <LineChart data={getChartDataForSensor(alertsBySensor[sensorId])}>
+                                  <CartesianGrid strokeDasharray="3 3" />
+                                  <XAxis 
+                                      dataKey="date" 
+                                      tickFormatter={(str) => format(new Date(str), 'MMM d')}
+                                  />
+                                  <YAxis allowDecimals={false} />
+                                  <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--background))',
+                                        borderColor: 'hsl(var(--border))',
+                                    }}
+                                    labelFormatter={(label) => format(new Date(label), 'PPP')}
+                                  />
+                                  <Line type="monotone" dataKey="count" name="Alerts" stroke="hsl(var(--primary))" strokeWidth={2} />
+                              </LineChart>
+                          </ResponsiveContainer>
+                      </div>
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Severity</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Timestamp</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {alertsBySensor[sensorId].map((alert) => (
+                          <TableRow key={alert.id}>
+                            <TableCell>{alert.description}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  alert.severity === 'critical' ||
+                                  alert.severity === 'high'
+                                    ? 'destructive'
+                                    : 'default'
+                                }
+                              >
+                                {alert.severity}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  alert.status === 'new'
+                                    ? 'outline'
+                                    : 'secondary'
+                                }
+                              >
+                                {alert.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(alert.timestamp).toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             ))}
