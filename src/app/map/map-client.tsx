@@ -25,6 +25,7 @@ import { getRecentReadings } from "@/lib/data";
 import { detectAnomalies } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
+import { useTheme } from "next-themes";
 
 type AnomalyPoint = {
   timestamp: string;
@@ -53,6 +54,7 @@ export default function MapClient({
   const [isDetecting, setIsDetecting] = useState(false);
   const [anomalyData, setAnomalyData] = useState<AnomalyPoint[]>([]);
   const { toast } = useToast();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -83,7 +85,7 @@ export default function MapClient({
   };
 
   const handleFilterChange = (type: Sensor["type"], checked: boolean | "indeterminate") => {
-    setFilter((prev) => ({ ...prev, [type]: checked }));
+    setFilter((prev) => ({ ...prev, [type]: !!checked }));
   };
   
   const handleDetectAnomalies = async () => {
@@ -119,6 +121,87 @@ export default function MapClient({
     }));
   }, [sensorReadings, anomalyData]);
 
+  const mapStyles = resolvedTheme === "dark" ? [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#263c3f" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#6b9a76" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#38414e" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212a37" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [{ color: "#746855" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#1f2835" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#f3d19c" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2f3948" }],
+    },
+    {
+      featureType: "transit.station",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#17263c" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#515c6d" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#17263c" }],
+    },
+  ] : [];
+
   return (
     <div className="h-[calc(100vh-120px)] w-full flex">
       <Card className="w-64 mr-4">
@@ -148,6 +231,7 @@ export default function MapClient({
               mapId="twinview_map"
               gestureHandling={'greedy'}
               disableDefaultUI={true}
+              styles={mapStyles}
             >
               {filteredSensors.map((sensor) => (
                 <AdvancedMarker
@@ -178,7 +262,7 @@ export default function MapClient({
                       <div className="p-2">
                         <h4 className="font-bold">{sensor.name}</h4>
                         <p className="text-sm text-muted-foreground">{sensor.type}</p>
-                        <Badge variant={sensor.status === 'online' ? 'default' : 'destructive'} className="mt-2">
+                        <Badge variant={sensor.status === 'online' ? 'default' : sensor.status === 'offline' ? 'secondary' : 'destructive'} className="mt-2">
                           {sensor.status}
                         </Badge>
                       </div>
@@ -201,7 +285,7 @@ export default function MapClient({
                 </SheetDescription>
                 <div className="flex gap-2 pt-2">
                   <Badge>{selectedSensor.type}</Badge>
-                  <Badge variant={selectedSensor.status === 'online' ? 'default' : 'destructive'}>{selectedSensor.status}</Badge>
+                  <Badge variant={selectedSensor.status === 'online' ? 'default' : selectedSensor.status === 'offline' ? 'secondary' : 'destructive'}>{selectedSensor.status}</Badge>
                 </div>
               </SheetHeader>
               <div className="py-6">
