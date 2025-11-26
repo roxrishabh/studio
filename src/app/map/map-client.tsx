@@ -248,9 +248,9 @@ export default function MapClient({
                         onMouseLeave={() => setHoveredSensorId(null)}
                       >
                         <Pin 
-                          background={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
-                          glyphColor={sensor.status === 'alert' ? 'hsl(var(--destructive-foreground))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary-foreground))' : 'hsl(var(--secondary))')}
-                          borderColor={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--secondary-foreground))')}
+                          background={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--accent))')}
+                          glyphColor={sensor.status === 'alert' ? 'hsl(var(--destructive-foreground))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary-foreground))' : 'hsl(var(--accent-foreground))')}
+                          borderColor={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--accent))')}
                         />
                       </div>
                     </PopoverTrigger>
