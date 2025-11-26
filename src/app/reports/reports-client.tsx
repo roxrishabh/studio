@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
-import type { Alert, Sensor } from '@/lib/types';
+import type { Alert } from '@/lib/types';
 import {
   Accordion,
   AccordionContent,
@@ -29,8 +29,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
+import { getSensorById } from '@/lib/data'; // We'll still use this to get sensor names
 
-export default function ReportsClient({ sensors }: { sensors: Sensor[] }) {
+export default function ReportsClient() {
   const firestore = useFirestore();
   const alertsCollection = firestore ? collection(firestore, 'alerts') : null;
   const alertsQuery = alertsCollection
@@ -50,14 +51,13 @@ export default function ReportsClient({ sensors }: { sensors: Sensor[] }) {
     }, {} as Record<string, Alert[]>);
   }, [alerts]);
 
-  const sensorMap = useMemo(() => {
-    return sensors.reduce((acc, sensor) => {
-      acc[sensor.id] = sensor;
-      return acc;
-    }, {} as Record<string, Sensor>);
-  }, [sensors]);
-
   const sensorIdsWithAlerts = Object.keys(alertsBySensor);
+
+  // Function to get sensor name, falling back to ID
+  const getSensorName = (sensorId: string) => {
+    const sensor = getSensorById(sensorId);
+    return sensor ? sensor.name : sensorId;
+  }
 
   return (
     <Card>
@@ -83,7 +83,7 @@ export default function ReportsClient({ sensors }: { sensors: Sensor[] }) {
                 <AccordionTrigger>
                   <div className="flex items-center gap-4">
                     <span className="font-medium">
-                      {sensorMap[sensorId]?.name || sensorId}
+                      {getSensorName(sensorId)}
                     </span>
                     <Badge>{alertsBySensor[sensorId].length} alerts</Badge>
                   </div>
