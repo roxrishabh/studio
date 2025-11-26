@@ -33,6 +33,13 @@ type AnomalyPoint = {
   isAnomalous: boolean;
 };
 
+const SENSOR_TYPE_COLORS: Record<Sensor["type"], string> = {
+  "Air Quality": "hsl(var(--chart-1))",
+  "Traffic": "hsl(var(--chart-2))",
+  "Noise Level": "hsl(var(--chart-4))",
+  "Public Transport": "hsl(var(--chart-5))",
+};
+
 export default function MapClient({ 
   sensors,
   initialSensor,
@@ -204,6 +211,12 @@ export default function MapClient({
     },
   ] : [];
 
+  const getPinColor = (sensor: Sensor) => {
+    if (sensor.status === 'alert') return 'hsl(var(--destructive))';
+    if (selectedSensor?.id === sensor.id) return 'hsl(var(--primary))';
+    return SENSOR_TYPE_COLORS[sensor.type] || 'hsl(var(--accent))';
+  }
+
   return (
     <div className="h-[calc(100vh-120px)] w-full flex">
       <Card className="w-64 mr-4">
@@ -219,7 +232,13 @@ export default function MapClient({
                 checked={filter[type as Sensor["type"]]}
                 onCheckedChange={(checked) => handleFilterChange(type as Sensor["type"], checked)}
               />
-              <Label htmlFor={type}>{type}</Label>
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: SENSOR_TYPE_COLORS[type as Sensor["type"]] }}
+                />
+                <Label htmlFor={type}>{type}</Label>
+              </div>
             </div>
           ))}
         </CardContent>
@@ -248,9 +267,9 @@ export default function MapClient({
                         onMouseLeave={() => setHoveredSensorId(null)}
                       >
                         <Pin 
-                          background={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--accent))')}
-                          glyphColor={sensor.status === 'alert' ? 'hsl(var(--destructive-foreground))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary-foreground))' : 'hsl(var(--accent-foreground))')}
-                          borderColor={sensor.status === 'alert' ? 'hsl(var(--destructive))' : (selectedSensor?.id === sensor.id ? 'hsl(var(--primary))' : 'hsl(var(--accent))')}
+                          background={getPinColor(sensor)}
+                          glyphColor="hsl(var(--primary-foreground))"
+                          borderColor={getPinColor(sensor)}
                         />
                       </div>
                     </PopoverTrigger>
