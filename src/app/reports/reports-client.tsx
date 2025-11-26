@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
-import type { Alert } from '@/lib/types';
+import type { Alert, SensorReading } from '@/lib/types';
 import {
   Accordion,
   AccordionContent,
@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
-import { getSensorById } from '@/lib/data'; 
+import { getSensorById, getHistoricalData } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
@@ -64,22 +64,10 @@ export default function ReportsClient() {
     return sensor ? sensor.name : sensorId;
   }
   
-  const getChartDataForSensor = (sensorAlerts: Alert[]) => {
-    const alertsByDate = sensorAlerts.reduce((acc, alert) => {
-      const date = format(new Date(alert.timestamp), 'yyyy-MM-dd');
-      if (!acc[date]) {
-        acc[date] = 0;
-      }
-      acc[date]++;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(alertsByDate)
-      .map(([date, count]) => ({
-        date,
-        count,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const getChartDataForSensor = (sensorId: string): SensorReading[] => {
+    // Get the last 100 historical readings for the sensor to display in the chart
+    const historicalReadings = getHistoricalData(sensorId, 100);
+    return historicalReadings.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   };
 
   return (
@@ -114,13 +102,13 @@ export default function ReportsClient() {
                 <AccordionContent>
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-semibold mb-4 text-center">Alerts per Day</h4>
+                      <h4 className="font-semibold mb-4 text-center">Historical Sensor Values</h4>
                       <div className="h-64 w-full">
                           <ResponsiveContainer>
-                              <LineChart data={getChartDataForSensor(alertsBySensor[sensorId])}>
+                              <LineChart data={getChartDataForSensor(sensorId)}>
                                   <CartesianGrid strokeDasharray="3 3" />
                                   <XAxis 
-                                      dataKey="date" 
+                                      dataKey="timestamp" 
                                       tickFormatter={(str) => format(new Date(str), 'MMM d')}
                                   />
                                   <YAxis allowDecimals={false} />
@@ -129,9 +117,9 @@ export default function ReportsClient() {
                                         backgroundColor: 'hsl(var(--background))',
                                         borderColor: 'hsl(var(--border))',
                                     }}
-                                    labelFormatter={(label) => format(new Date(label), 'PPP')}
+                                    labelFormatter={(label) => format(new Date(label), 'PPP p')}
                                   />
-                                  <Line type="monotone" dataKey="count" name="Alerts" stroke="hsl(var(--primary))" strokeWidth={2} />
+                                  <Line type="monotone" dataKey="value" name={getSensorById(sensorId)?.type} stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
                               </LineChart>
                           </ResponsiveContainer>
                       </div>
