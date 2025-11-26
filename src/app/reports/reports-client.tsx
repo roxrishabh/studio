@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
@@ -26,16 +26,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle } from 'lucide-react';
-import { getSensorById, getHistoricalData } from '@/lib/data';
+import { AlertTriangle, Filter } from 'lucide-react';
+import { getSensorById, getHistoricalData, getSensors } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
 
 export default function ReportsClient() {
   const firestore = useFirestore();
+  const [filterType, setFilterType] = useState<string>("all");
 
   const alertsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -44,6 +52,11 @@ export default function ReportsClient() {
   }, [firestore]);
 
   const { data: alerts, loading } = useCollection<Alert>(alertsQuery);
+
+  const sensors = getSensors();
+  const sensorTypes = useMemo(() => {
+    return [...new Set(sensors.map((s) => s.type))];
+  }, [sensors]);
 
   const alertsBySensor = useMemo(() => {
     if (!alerts) return {};
@@ -56,7 +69,16 @@ export default function ReportsClient() {
     }, {} as Record<string, Alert[]>);
   }, [alerts]);
 
-  const sensorIdsWithAlerts = Object.keys(alertsBySensor);
+  const sensorIdsWithAlerts = useMemo(() => {
+    const allSensorIds = Object.keys(alertsBySensor);
+    if (filterType === 'all') {
+      return allSensorIds;
+    }
+    return allSensorIds.filter(sensorId => {
+      const sensor = getSensorById(sensorId);
+      return sensor?.type === filterType;
+    });
+  }, [alertsBySensor, filterType]);
 
   // Function to get sensor name, falling back to ID
   const getSensorName = (sensorId: string) => {
@@ -81,11 +103,31 @@ export default function ReportsClient() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sensor Alert History</CardTitle>
-        <CardDescription>
-          A historical log of all alerts triggered by each sensor, fetched from
-          Firestore.
-        </CardDescription>
+        <div className="flex justify-between items-center">
+            <div>
+                <CardTitle>Sensor Alert History</CardTitle>
+                <CardDescription>
+                A historical log of all alerts triggered by each sensor, fetched from
+                Firestore.
+                </CardDescription>
+            </div>
+            <div className="w-48">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger>
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {sensorTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         {loading && (
@@ -185,7 +227,12 @@ export default function ReportsClient() {
             <div className="flex flex-col items-center justify-center text-center text-muted-foreground min-h-60">
                 <AlertTriangle className="h-12 w-12 mb-4" />
                 <p className="text-lg font-semibold">No Alert Data Found</p>
-                <p>There are no alert records in your Firestore database. You can add some on the Dashboard page.</p>
+                <p>
+                  {filterType === 'all' 
+                    ? "There are no alert records in your Firestore database. You can add some on the Dashboard page."
+                    : `No alerts found for sensor type: ${filterType}.`
+                  }
+                </p>
             </div>
         )}
       </CardContent>
