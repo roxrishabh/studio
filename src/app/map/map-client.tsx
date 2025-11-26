@@ -218,33 +218,35 @@ export default function MapClient({
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] w-full flex">
-      <Card className="w-64 mr-4">
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <h3 className="font-semibold">Sensor Type</h3>
-          {Object.keys(filter).map((type) => (
-            <div key={type} className="flex items-center space-x-2">
-              <Checkbox
-                id={type}
-                checked={filter[type as Sensor["type"]]}
-                onCheckedChange={(checked) => handleFilterChange(type as Sensor["type"], checked)}
-              />
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: SENSOR_TYPE_COLORS[type as Sensor["type"]] }}
+    <div className="relative h-[calc(100vh-120px)] w-full">
+      <div className="absolute top-0 left-0 z-10 p-4">
+        <Card className="w-64">
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <h3 className="font-semibold">Sensor Type</h3>
+            {Object.keys(filter).map((type) => (
+              <div key={type} className="flex items-center space-x-2">
+                <Checkbox
+                  id={type}
+                  checked={filter[type as Sensor["type"]]}
+                  onCheckedChange={(checked) => handleFilterChange(type as Sensor["type"], checked)}
                 />
-                <Label htmlFor={type}>{type}</Label>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: SENSOR_TYPE_COLORS[type as Sensor["type"]] }}
+                  />
+                  <Label htmlFor={type}>{type}</Label>
+                </div>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="flex-1 h-full rounded-lg overflow-hidden">
+      <div className="h-full w-full rounded-lg overflow-hidden">
         <Suspense fallback={<div className="bg-muted h-full w-full flex items-center justify-center">Loading Map...</div>}>
             <GoogleMap
               center={mapCenter}
@@ -253,6 +255,7 @@ export default function MapClient({
               gestureHandling={'greedy'}
               disableDefaultUI={true}
               styles={mapStyles}
+              className="h-full w-full"
             >
               {filteredSensors.map((sensor) => (
                 <AdvancedMarker
