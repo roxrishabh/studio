@@ -22,25 +22,12 @@ export default function DashboardClient({ sensors, alerts, loadingAlerts }: { se
   }, [sensors]);
 
   const alertHistogramData = useMemo(() => {
-    // Initialize all sensors with 0 alerts
-    const alertCounts: Record<string, number> = sensors.reduce((acc, sensor) => {
-      acc[sensor.name] = 0;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // If there are alerts, increment the counts
-    if (alerts) {
-      alerts.forEach((alert) => {
-        const sensorName = sensors.find(s => s.id === alert.sensorId)?.name || alert.sensorId;
-        if (sensorName in alertCounts) {
-          alertCounts[sensorName]++;
-        }
-      });
-    }
-
-    return Object.entries(alertCounts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count); // Sort descending
+    // The `sensors` array is already sorted numerically by ID from the data source.
+    // We can map over it directly to preserve this order.
+    return sensors.map(sensor => {
+        const alertCount = alerts?.filter(alert => alert.sensorId === sensor.id).length || 0;
+        return { name: sensor.name, count: alertCount };
+    });
   }, [alerts, sensors]);
 
   return (
