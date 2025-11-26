@@ -218,8 +218,8 @@ export default function MapClient({
   }
 
   return (
-    <div className="relative h-[calc(100vh-120px)] w-full">
-      <div className="absolute top-0 left-0 z-10 p-4">
+    <div className="h-full w-full relative">
+      <div className="absolute top-4 left-4 z-10">
         <Card className="w-64">
           <CardHeader>
             <CardTitle>Filters</CardTitle>
@@ -246,57 +246,55 @@ export default function MapClient({
         </Card>
       </div>
 
-      <div className="h-full w-full rounded-lg overflow-hidden">
-        <Suspense fallback={<div className="bg-muted h-full w-full flex items-center justify-center">Loading Map...</div>}>
-            <GoogleMap
-              center={mapCenter}
-              defaultZoom={12}
-              mapId="twinview_map"
-              gestureHandling={'greedy'}
-              disableDefaultUI={true}
-              styles={mapStyles}
-              className="h-full w-full"
-            >
-              {filteredSensors.map((sensor) => (
-                <AdvancedMarker
-                  key={sensor.id}
-                  position={sensor.location}
-                  onClick={() => handleMarkerClick(sensor)}
-                >
-                  <Popover open={hoveredSensorId === sensor.id}>
-                    <PopoverTrigger asChild>
-                      <div
-                        onMouseEnter={() => setHoveredSensorId(sensor.id)}
-                        onMouseLeave={() => setHoveredSensorId(null)}
-                      >
-                        <Pin 
-                          background={getPinColor(sensor)}
-                          glyphColor="hsl(var(--primary-foreground))"
-                          borderColor={getPinColor(sensor)}
-                        />
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      side="top"
-                      align="center"
-                      className="w-auto p-2"
+      <Suspense fallback={<div className="bg-muted h-full w-full flex items-center justify-center">Loading Map...</div>}>
+          <GoogleMap
+            center={mapCenter}
+            defaultZoom={12}
+            mapId="twinview_map"
+            gestureHandling={'greedy'}
+            disableDefaultUI={true}
+            styles={mapStyles}
+            className="h-full w-full"
+          >
+            {filteredSensors.map((sensor) => (
+              <AdvancedMarker
+                key={sensor.id}
+                position={sensor.location}
+                onClick={() => handleMarkerClick(sensor)}
+              >
+                <Popover open={hoveredSensorId === sensor.id}>
+                  <PopoverTrigger asChild>
+                    <div
                       onMouseEnter={() => setHoveredSensorId(sensor.id)}
                       onMouseLeave={() => setHoveredSensorId(null)}
                     >
-                      <div className="p-2">
-                        <h4 className="font-bold">{sensor.name}</h4>
-                        <p className="text-sm text-muted-foreground">{sensor.type}</p>
-                        <Badge variant={sensor.status === 'online' ? 'default' : sensor.status === 'offline' ? 'secondary' : 'destructive'} className="mt-2">
-                          {sensor.status}
-                        </Badge>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </AdvancedMarker>
-              ))}
-            </GoogleMap>
-        </Suspense>
-      </div>
+                      <Pin 
+                        background={getPinColor(sensor)}
+                        glyphColor="hsl(var(--primary-foreground))"
+                        borderColor={getPinColor(sensor)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="top"
+                    align="center"
+                    className="w-auto p-2"
+                    onMouseEnter={() => setHoveredSensorId(sensor.id)}
+                    onMouseLeave={() => setHoveredSensorId(null)}
+                  >
+                    <div className="p-2">
+                      <h4 className="font-bold">{sensor.name}</h4>
+                      <p className="text-sm text-muted-foreground">{sensor.type}</p>
+                      <Badge variant={sensor.status === 'online' ? 'default' : sensor.status === 'offline' ? 'secondary' : 'destructive'} className="mt-2">
+                        {sensor.status}
+                      </Badge>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </AdvancedMarker>
+            ))}
+          </GoogleMap>
+      </Suspense>
 
       <Sheet open={!!selectedSensor} onOpenChange={(open) => !open && setSelectedSensor(undefined)}>
         <SheetContent className="sm:max-w-xl w-full">
