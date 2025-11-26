@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -29,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Alert, Sensor } from "@/lib/types";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AlertsClient({
@@ -41,75 +42,107 @@ export default function AlertsClient({
   sensors: Sensor[];
   loading: boolean;
 }) {
+  const [filterType, setFilterType] = useState<string>("all");
+
+  const filteredAlerts = useMemo(() => {
+    if (!alerts) return [];
+    if (filterType === "all") {
+      return alerts;
+    }
+    return alerts.filter((alert) => alert.sensorType === filterType);
+  }, [alerts, filterType]);
+
+  const sensorTypes = useMemo(() => {
+    return [...new Set(sensors.map((s) => s.type))];
+  }, [sensors]);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-headline">Manage Alerts</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Alert
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Alert</DialogTitle>
-              <DialogDescription>
-                Configure a new alert based on sensor data thresholds.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="sensor" className="text-right">
-                  Sensor
-                </Label>
-                <Select>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a sensor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sensors.map((sensor) => (
-                      <SelectItem key={sensor.id} value={sensor.id}>
-                        {sensor.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="flex items-center gap-2">
+          <div className="w-48">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger>
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {sensorTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Alert
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create New Alert</DialogTitle>
+                <DialogDescription>
+                  Configure a new alert based on sensor data thresholds.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="sensor" className="text-right">
+                    Sensor
+                  </Label>
+                  <Select>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select a sensor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sensors.map((sensor) => (
+                        <SelectItem key={sensor.id} value={sensor.id}>
+                          {sensor.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="threshold" className="text-right">
+                    Threshold
+                  </Label>
+                  <Input
+                    id="threshold"
+                    type="number"
+                    placeholder="e.g., 100"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="severity" className="text-right">
+                    Severity
+                  </Label>
+                  <Select>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select severity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="threshold" className="text-right">
-                  Threshold
-                </Label>
-                <Input
-                  id="threshold"
-                  type="number"
-                  placeholder="e.g., 100"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="severity" className="text-right">
-                  Severity
-                </Label>
-                <Select>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select severity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Create Alert</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button type="submit">Create Alert</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       <div className="border rounded-lg">
         <Table>
@@ -139,7 +172,7 @@ export default function AlertsClient({
                   <TableCell>
                     <Skeleton className="h-4 w-36" />
                   </TableCell>
-                   <TableCell>
+                  <TableCell>
                     <Skeleton className="h-6 w-20 rounded-full" />
                   </TableCell>
                   <TableCell>
@@ -147,7 +180,7 @@ export default function AlertsClient({
                   </TableCell>
                 </TableRow>
               ))}
-            {!loading && alerts?.map((alert) => (
+            {!loading && filteredAlerts.map((alert) => (
               <TableRow key={alert.id}>
                 <TableCell className="font-medium">{alert.sensorId}</TableCell>
                 <TableCell>{alert.sensorType}</TableCell>
@@ -175,13 +208,16 @@ export default function AlertsClient({
                 <TableCell>{alert.description}</TableCell>
               </TableRow>
             ))}
-             {!loading && (!alerts || alerts.length === 0) && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">
-                    No alerts found in Firestore. You can add some from the Dashboard page.
-                  </TableCell>
-                </TableRow>
-              )}
+            {!loading && filteredAlerts.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center h-24">
+                  {filterType === 'all' 
+                    ? "No alerts found in Firestore. You can add some from the Dashboard page."
+                    : `No alerts found for sensor type: ${filterType}.`
+                  }
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
