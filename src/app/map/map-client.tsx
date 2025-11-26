@@ -45,7 +45,7 @@ export default function MapClient({
   const [selectedSensor, setSelectedSensor] = useState<Sensor | undefined>(initialSensor);
   const [hoveredSensorId, setHoveredSensorId] = useState<string | null>(null);
   const [sensorReadings, setSensorReadings] = useState<SensorReading[]>(initialReadings);
-  const [mapCenter, setMapCenter] = useState({ lat: 37.7749, lng: -122.4194 });
+  const [mapCenter, setMapCenter] = useState({ lat: 26.9124, lng: 75.7873 }); // Default to Jaipur
   const [filter, setFilter] = useState<Record<Sensor["type"], boolean>>({
     "Air Quality": true,
     "Traffic": true,
@@ -58,6 +58,7 @@ export default function MapClient({
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
+    // This will try to use Geolocation but will fall back to Jaipur if permission is denied.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {

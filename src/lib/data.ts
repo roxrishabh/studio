@@ -1,18 +1,15 @@
 import type { Sensor, SensorReading, Alert } from './types';
 
 const SENSOR_LOCATIONS = [
-  // Downtown
-  { lat: 37.7749, lng: -122.4194 },
-  { lat: 37.7755, lng: -122.4180 },
-  { lat: 37.7730, lng: -122.4210 },
-  // Golden Gate Park
-  { lat: 37.7694, lng: -122.4862 },
-  { lat: 37.7715, lng: -122.4537 },
-  // Mission District
-  { lat: 37.7599, lng: -122.4148 },
-  { lat: 37.7610, lng: -122.4190 },
-  // Fisherman's Wharf
-  { lat: 37.8080, lng: -122.4177 },
+  // Jaipur Locations
+  { lat: 26.9124, lng: 75.7873 }, // City Palace area
+  { lat: 26.9239, lng: 75.8267 }, // Hawa Mahal
+  { lat: 26.8955, lng: 75.8256 }, // Albert Hall Museum
+  { lat: 26.9531, lng: 75.8049 }, // Jal Mahal
+  { lat: 26.9868, lng: 75.8284 }, // Amber Palace
+  { lat: 26.8510, lng: 75.8052 }, // Jaipur International Airport area
+  { lat: 26.9189, lng: 75.7436 }, // Vaishali Nagar
+  { lat: 26.8841, lng: 75.7801 }, // Mansarovar
 ];
 
 const SENSOR_TYPES: Sensor['type'][] = ['Air Quality', 'Traffic', 'Noise Level', 'Public Transport'];
