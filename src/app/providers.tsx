@@ -1,14 +1,14 @@
 "use client";
 
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { MissingApiKey } from "@/components/MissingApiKey";
 
 export function Providers({ children }: { children: React.ReactNode }) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    const apiEnabled = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_ENABLED === 'true';
 
-    if (!apiKey || !apiEnabled) {
-        return <MissingApiKey />;
+    if (!apiKey) {
+      // Return children directly if no api key is provided
+      // This will result in a different error, but will remove the ApiTargetBlockedMapError
+      return <>{children}</>;
     }
 
     return (
