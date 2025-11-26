@@ -22,18 +22,25 @@ export default function DashboardClient({ sensors, alerts, loadingAlerts }: { se
   }, [sensors]);
 
   const alertHistogramData = useMemo(() => {
-    if (!alerts) return [];
-    
-    const alertCounts = alerts.reduce((acc, alert) => {
-      const sensorName = sensors.find(s => s.id === alert.sensorId)?.name || alert.sensorId;
-      acc[sensorName] = (acc[sensorName] || 0) + 1;
+    // Initialize all sensors with 0 alerts
+    const alertCounts: Record<string, number> = sensors.reduce((acc, sensor) => {
+      acc[sensor.name] = 0;
       return acc;
     }, {} as Record<string, number>);
 
-    return Object.entries(alertCounts)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count); // Sort descending
+    // If there are alerts, increment the counts
+    if (alerts) {
+      alerts.forEach((alert) => {
+        const sensorName = sensors.find(s => s.id === alert.sensorId)?.name || alert.sensorId;
+        if (sensorName in alertCounts) {
+          alertCounts[sensorName]++;
+        }
+      });
+    }
 
+    return Object.entries(alertCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count); // Sort descending
   }, [alerts, sensors]);
 
   return (
@@ -78,7 +85,7 @@ export default function DashboardClient({ sensors, alerts, loadingAlerts }: { se
               {alertHistogramData.length > 0 ? (
                 <BarChart data={alertHistogramData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={60} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={60} interval={0} />
                   <YAxis allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
@@ -86,7 +93,7 @@ export default function DashboardClient({ sensors, alerts, loadingAlerts }: { se
                       borderColor: 'hsl(var(--border))',
                     }}
                   />
-                  <Bar dataKey="count" name="Alerts" fill="hsl(var(--primary))" />
+                  <Bar dataKey="count" name="Alerts" fill="hsl(var(--primary))" barSize={20} />
                 </BarChart>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
