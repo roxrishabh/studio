@@ -70,6 +70,14 @@ export default function ReportsClient() {
     return historicalReadings.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   };
 
+  const istFormatter = (date: string | Date) => {
+    return format(new Date(date), 'PPP p', { timeZone: 'Asia/Kolkata' } as any);
+  };
+  
+  const istTickFormatter = (str: string) => {
+    return format(new Date(str), 'MMM d', { timeZone: 'Asia/Kolkata' } as any);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -109,7 +117,7 @@ export default function ReportsClient() {
                                   <CartesianGrid strokeDasharray="3 3" />
                                   <XAxis 
                                       dataKey="timestamp" 
-                                      tickFormatter={(str) => format(new Date(str), 'MMM d')}
+                                      tickFormatter={istTickFormatter}
                                   />
                                   <YAxis allowDecimals={false} />
                                   <Tooltip 
@@ -117,7 +125,7 @@ export default function ReportsClient() {
                                         backgroundColor: 'hsl(var(--background))',
                                         borderColor: 'hsl(var(--border))',
                                     }}
-                                    labelFormatter={(label) => format(new Date(label), 'PPP p')}
+                                    labelFormatter={istFormatter}
                                   />
                                   <Line type="monotone" dataKey="value" name={getSensorById(sensorId)?.type} stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
                               </LineChart>
@@ -161,7 +169,7 @@ export default function ReportsClient() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {new Date(alert.timestamp).toLocaleString()}
+                              {new Date(alert.timestamp).toLocaleString("en-GB", { timeZone: 'Asia/Kolkata' })}
                             </TableCell>
                           </TableRow>
                         ))}

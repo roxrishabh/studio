@@ -85,7 +85,7 @@ export default function DashboardPage() {
                       {alert.severity}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(alert.timestamp).toLocaleString()}</TableCell>
+                  <TableCell>{new Date(alert.timestamp).toLocaleString("en-GB", { timeZone: 'Asia/Kolkata' })}</TableCell>
                 </TableRow>
               ))}
                {!loading && (!alerts || alerts.length === 0) && (

@@ -114,7 +114,7 @@ export default function MapClient({
     const anomalyMap = new Map(anomalyData.map(d => [d.timestamp, d.isAnomalous]));
     return sensorReadings.map(reading => ({
       ...reading,
-      time: new Date(reading.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(reading.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }),
       isAnomalous: anomalyMap.get(reading.timestamp)
     }));
   }, [sensorReadings, anomalyData]);

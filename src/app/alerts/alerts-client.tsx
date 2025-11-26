@@ -196,7 +196,7 @@ export default function AlertsClient({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(alert.timestamp).toLocaleString()}
+                  {new Date(alert.timestamp).toLocaleString("en-GB", { timeZone: 'Asia/Kolkata' })}
                 </TableCell>
                 <TableCell>
                   <Badge

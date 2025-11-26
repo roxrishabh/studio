@@ -17,7 +17,7 @@ const getSensorDataForChart = (sensors: Sensor[]) => {
     const time = new Date(now.getTime() - (29 - i) * 60000); // last 30 minutes
     const activeSensors = sensors.filter(s => s.status === 'online').length;
     return {
-      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }),
       value: Math.floor(activeSensors * (0.9 + Math.random() * 0.15)), // simulate fluctuations
     };
   });
