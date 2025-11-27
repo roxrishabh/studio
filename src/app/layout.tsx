@@ -5,6 +5,7 @@ import AppLayout from '@/components/layout/app-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { Providers } from './providers';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import AuthGuard from '@/components/AuthGuard';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,13 +28,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <Providers>
           <FirebaseClientProvider>
-            <AppLayout>
-              {children}
-            </AppLayout>
+            <AuthGuard>
+              <AppLayout>
+                {children}
+              </AppLayout>
+            </AuthGuard>
           </FirebaseClientProvider>
         </Providers>
         <Toaster />

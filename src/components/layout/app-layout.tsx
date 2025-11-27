@@ -14,6 +14,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const isMobile = useIsMobile();
     const pathname = usePathname();
     const isMapPage = pathname === '/map';
+    const isLoginPage = pathname === '/login';
+
+    if (isLoginPage) {
+        return <main>{children}</main>;
+    }
 
     const mainContentClasses = cn(
       "flex-1 bg-background",
