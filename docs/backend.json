@@ -1,5 +1,57 @@
 {
   "entities": {
+    "Sensor": {
+      "title": "Sensor",
+      "description": "Represents a physical sensor device in the IoT network.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Air Quality",
+            "Traffic",
+            "Noise Level",
+            "Public Transport"
+          ]
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "number"
+            },
+            "lng": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "lat",
+            "lng"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "online",
+            "offline",
+            "alert"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "location",
+        "status"
+      ]
+    },
     "UserProfile": {
       "title": "User Profile",
       "description": "Represents a user's profile in the system.",
@@ -83,10 +135,17 @@
   },
   "auth": {
     "providers": [
-      "google.com"
+      "google.com",
+      "password"
     ]
   },
   "firestore": {
+    "/sensors/{sensorId}": {
+      "schema": {
+        "$ref": "#/entities/Sensor"
+      },
+      "description": "Stores individual sensor device configurations."
+    },
     "/alerts/{alertId}": {
       "schema": {
         "$ref": "#/entities/Alert"
