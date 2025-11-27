@@ -2,8 +2,6 @@
 
 import {
   getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
@@ -13,7 +11,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -86,29 +83,6 @@ export default function LoginPage() {
           variant: 'destructive',
           title: 'Authentication Failed',
           description: error.message || `Could not ${action}. Please try again.`,
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setAuthError(null);
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      // The AuthGuard will handle redirection
-    } catch (error: any) {
-      console.error('Error during Google sign-in:', error);
-      if (error.code === 'auth/unauthorized-domain') {
-        setAuthError(error.message);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: 'Could not sign in with Google. Please try again.',
         });
       }
     } finally {
@@ -209,35 +183,6 @@ export default function LoginPage() {
               Sign Up
             </Button>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          <Button
-            onClick={handleGoogleSignIn}
-            className="w-full"
-            variant="outline"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader className="animate-spin" />
-            ) : (
-              <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4">
-                <path
-                  fill="currentColor"
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.6 1.62-4.8 1.62-4.32 0-7.78-3.57-7.78-7.9s3.46-7.9 7.78-7.9c2.44 0 4.13.93 5.37 2.1.94.94 1.5 2.44 1.5 4.13v.14h-6.88z"
-                />
-              </svg>
-            )}
-            Google
-          </Button>
         </CardContent>
       </Card>
     </div>
